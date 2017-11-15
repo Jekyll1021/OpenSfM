@@ -83,10 +83,10 @@ def match_lowe_bf(f1, f2, config, im1_seg=None, im2_seg=None):
     for match in matches:
         if match and len(match) == 2:
             m, n = match
-            if im1_seg is not None:
+            if im1_seg is not None and im2_seg is not None:
                 idx1 = m.queryIdx
                 idx2 = n.trainIdx
-                if im1_seg[idx1] == 0 and im2_seg[idx2] == 0:
+                if idx1<len(im1_seg) and idx2<len(im2_seg) and im1_seg[idx1] == 0 and im2_seg[idx2] == 0:
                     ratio = 1
                 else:
                     ratio = config.get('lowes_ratio', 0.6)

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+echo $1
+
+runs=($1/*/)
+num_gpus=4
+for ((i=0;i<${#runs[@]};i+=${num_gpus})); do
+	bin/run_all ${runs[${i}]} 4 &
+	bin/run_all ${runs[${i}+1]} 5 &
+	bin/run_all ${runs[${i}+2]} 6 &
+	bin/run_all ${runs[${i}+3]} 7 &
+	#bin/run_all ${runs[${i}+4]} 4 &
+	#bin/run_all ${runs[${i}+5]} 5 &
+	#bin/run_all ${runs[${i}+6]} 6 &
+	#bin/run_all ${runs[${i}+7]} 7 &
+	wait
+done	
