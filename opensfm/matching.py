@@ -1,11 +1,8 @@
 import numpy as np
-import cv2
+import cv2, logging, pyopengv, time, sys
 import networkx as nx
-import logging
 from collections import defaultdict
 from itertools import combinations
-import pyopengv
-import time
 from opensfm import context
 from opensfm.unionfind import UnionFind
 
@@ -31,7 +28,8 @@ def match_lowe(index, f2, config, im1_seg=None, im2_seg=None):
 
 def match_symmetric(fi, indexi, fj, indexj, config, im1_seg=None, im2_seg=None):
     t = time.time()
-    print("Symmetric matching commencing")
+    sys.stdout.write("symmetric matching commencing... ")
+    sys.stdout.flush()
     if config.get('matcher_type', 'FLANN') == 'FLANN':
         matches_ij = [(a,b) for a,b in match_lowe(indexi, fj, config, im1_seg,
                                                  im2_seg)]
@@ -51,7 +49,7 @@ def match_symmetric(fi, indexi, fj, indexj, config, im1_seg=None, im2_seg=None):
         matches_ji = [(a,fj_new2old[b]) for a,b in matches_ji]
 
     matches = set(matches_ij).intersection(set(matches_ji))
-    print("matching time ", time.time()-t, " seconds")
+    print("done. matching time: %s seconds" % str(time.time() - t))
     return np.array(list(matches), dtype=int)
 
 
@@ -83,10 +81,10 @@ def match_lowe_bf(f1, f2, config, im1_seg=None, im2_seg=None):
     for match in matches:
         if match and len(match) == 2:
             m, n = match
-            if im1_seg is not None and im2_seg is not None:
+            if im1_seg is not None:
                 idx1 = m.queryIdx
                 idx2 = n.trainIdx
-                if idx1<len(im1_seg) and idx2<len(im2_seg) and im1_seg[idx1] == 0 and im2_seg[idx2] == 0:
+                if im1_seg[idx1] == 0 and im2_seg[idx2] == 0:
                     ratio = 1
                 else:
                     ratio = config.get('lowes_ratio', 0.6)

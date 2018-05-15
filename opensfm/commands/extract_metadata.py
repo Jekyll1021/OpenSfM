@@ -1,6 +1,4 @@
-import copy
-import logging
-import time
+import copy, logging, time, os
 from PIL import Image
 
 from opensfm import dataset
@@ -19,8 +17,14 @@ class Command:
         parser.add_argument('dataset', help='dataset to process')
 
     def run(self, args):
-        start = time.time()
+        print "extracting metadata"
+
         data = dataset.DataSet(args.dataset)
+        if os.path.exists(data.exif_path()):
+            print "exifs already generated, exit\n"
+            return
+
+        start = time.time()
 
         camera_models = {}
         for image in data.images():
@@ -56,3 +60,5 @@ class Command:
         end = time.time()
         with open(data.profile_log(), 'a') as fout:
             fout.write('focal_from_exif: {0}\n'.format(end - start))
+
+        print "exit\n"

@@ -1,9 +1,11 @@
 import sys, os
-sys.path.append("/home/abobu/OpenSfM/")
+sys.path.append("/root/deepdrive/OpenSfM")
 from opensfm.car import parse_ride_json
 from opensfm.pexif import JpegFile
 
 if __name__ == "__main__":
+    print "attempting to add gps to images"
+
     dataset_path = sys.argv[1]
 
     json_path = os.path.join(dataset_path, "ride.json")
@@ -40,4 +42,7 @@ if __name__ == "__main__":
                 ef.set_geo(gps_interp[i, 0], gps_interp[i, 1])
                 ef.writeFile(imname)
     else:
-        print "json not found, exit"
+        print "json not found"
+
+    print "exit"
+    print

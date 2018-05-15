@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+
+# TODO streamline this into one grep | sed command
+
+import subprocess, sys, os
+
+# Get files that require manual PYTHONPATH appends
+output = subprocess.check_output( \
+            "grep -r --exclude=\"*.ipynb\" \"sys.path.append\"", \
+            shell = True) \
+        .decode("utf-8") \
+        .strip() \
+        .split("\n")
+
+# Fixed path
+if len(sys.argv) > 1:
+    fixed_path = sys.argv[1]
+    fixed = ("sys.path.append(\"%s\")" % fixed_path).replace("/", "\\/")
+else:
+    fixed_path = os.path.join(os.path.dirname(os.getcwd()), "OpenSfM")
+    fixed = ("sys.path.append(\"%s\")" % fixed_path).replace("/", "\\/")
+
+print("Using path to OpenSfM directory \"%s\"" % fixed_path)
+
+# Search and replace with fixed path
+for line in output:
+    # Skip this script
+    if line.startswith("update_paths"):
+        continue
+
+    index = line.index(":")
+    file_name, path_line = line[: index], line[index + 1 :].replace("/", "\\/")
+
+    print("In file %s: Replacing \"%s\" with \"%s\"" % (file_name, path_line.replace("\\/", "/"), fixed.replace("\\/", "/")))
+
+    subprocess.run(["sed", "-i", "s/%s/%s/g" % (path_line, fixed), file_name])
+
+print()
+
+# Get files that require a path to DILATION directory
+output = subprocess.check_output( \
+            "grep -r \"DILATION_BIN=\"", \
+            shell = True) \
+        .decode("utf-8") \
+        .strip() \
+        .split("\n")
+
+# Fixed path
+if len(sys.argv) > 2:
+    fixed_path = sys.argv[2]
+    fixed = ("DILATION_BIN=\"%s\"" % fixed_path).replace("/", "\\/")
+else:
+    fixed_path = os.path.join(os.path.dirname(os.getcwd()), "dilation")
+    fixed = ("DILATION_BIN=\"%s\"" % fixed_path).replace("/", "\\/")
+
+print("Using path to Dilation directory \"%s\"" % fixed_path)
+
+# Search and replace with fixed dilation path
+for line in output:
+    # Skip this script
+    if line.startswith("update_paths"):
+        continue
+
+    index = line.index(":")
+    file_name, path_line = line[: index], line[index + 1 :].replace("/", "\\/")
+
+    print("In file %s: Replacing \"%s\" with \"%s\"" % (file_name, path_line.replace("\\/", "/"), fixed.replace("\\/", "/")))
+
+    subprocess.run(["sed", "-i", "s/%s/%s/g" % (path_line, fixed), file_name])
